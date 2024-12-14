@@ -1,0 +1,22 @@
+{
+  "name": "cognito-invalidate-tokens-demo",
+  "version": "1.0.0",
+  "description": "Demo to show how one can invalidate tokens issued by Cognito",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.146",
+    "serverless": "^4.4.16",
+    "serverless-iam-roles-per-function": "^3.2.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.712.0",
+    "@gomomento/sdk": "^1.102.0",
+    "aws-jwt-verify": "^4.0.1"
+  }
+}

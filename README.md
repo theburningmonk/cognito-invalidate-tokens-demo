@@ -1,2 +1,1 @@
-# cognito-invalidate-tokens-demo
-Demo to show how one can invalidate tokens issued by Cognito
+# Demo to show how to invalidate Cognito-issued tokens

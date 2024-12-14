@@ -1,0 +1,79 @@
+org: theburningmonk
+
+app: cognito-invalidate
+
+service: cognito-invalidate
+
+plugins:
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  hello:
+    handler: functions/hello.handler
+    events:
+      - http:
+          path: /
+          method: get
+          authorizer: 
+            name: authorizer
+            resultTtlInSeconds: 0
+
+  sign-out:
+    handler: functions/sign-out.handler
+    events:
+      - http:
+          path: /sign-out
+          method: post
+          authorizer: 
+            name: authorizer
+            resultTtlInSeconds: 0
+    environment:
+      COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+      MOMENTO_CACHE_NAME: session
+      MOMENTO_API_KEY: ${ssm:/cognito-invalidate-demo/dev/momento/api-key}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: cognito-idp:AdminUserGlobalSignOut
+        Resource: !GetAtt CognitoUserPool.Arn
+
+  authorizer:
+    handler: functions/authorizer.handler
+    environment:
+      COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+      COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
+      MOMENTO_CACHE_NAME: session
+      MOMENTO_API_KEY: ${ssm:/cognito-invalidate-demo/dev/momento/api-key}
+
+resources:
+  Resources:
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: cognito-invalidate-demo
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: true
+            RequireUppercase: true
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: web
+        GenerateSecret: false
+        UserPoolId: !Ref CognitoUserPool
+        ExplicitAuthFlows:
+          - ALLOW_USER_SRP_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        PreventUserExistenceErrors: ENABLED
